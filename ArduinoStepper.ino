@@ -5,16 +5,19 @@
 
 long pos = 0;
 long target = 0;
-int velocity = 1000;
+int velocity = 2000;
 
 unsigned long start = 0;
 
 void setup() {
-  Serial.begin(9600);
-  //while (!Serial) {}
-  
   pinMode(stp, OUTPUT);
   pinMode(dir, OUTPUT);
+
+  digitalWrite(dir, false);
+  digitalWrite(stp, false);
+
+  Serial.begin(9600);
+  while (!Serial) {}
 }
 
 void loop() {
@@ -26,15 +29,28 @@ void loop() {
     String cmd = doc["command"];
     
     if (cmd == "goto") {
-      target += doc["steps"].as<int>();
-      velocity = doc["velocity"];
-    } else if (cmd == "move") {
+      int doc_steps = doc["steps"].as<int>();
+      if (doc_steps > 0) {
+        target += doc_steps;
+        int doc_velocity = doc["velocity"].as<int>();
+        if (doc_velocity >= 1000 and doc_velocity <= 10000) {
+          velocity = doc_velocity;
+        } else {
+          velocity = 2000;
+        }
+      }
+    } else if (cmd == "move" and not doc["direction"].isNull()) {
       if (doc["direction"] == "up") {
         target += 19200;
       } else {
         target -= 19200;
       }
-      velocity = doc["velocity"];
+      int doc_velocity = doc["velocity"].as<int>();
+      if (doc_velocity >= 1000 and doc_velocity <= 10000) {
+        velocity = doc_velocity;
+      } else {
+        velocity = 2000;
+      }
     } else if (cmd == "stop") {
       target = pos;
     } else if (cmd == "position") {
@@ -42,6 +58,11 @@ void loop() {
       doc["position"] = pos;
       serializeJson(doc, Serial);
       Serial.println();
+    } else if (cmd == "sethome") {
+      target = 0;
+      pos = 0;
+    } else if (cmd == "ping") {
+      Serial.println("pong");
     }
   }
   
@@ -57,5 +78,7 @@ void loop() {
       digitalWrite(stp, true);
       pos++;
     }
+
+    delayMicroseconds(500);
   }
 }
