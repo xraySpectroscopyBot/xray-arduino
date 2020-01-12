@@ -30,7 +30,7 @@ void loop() {
     
     if (cmd == "goto") {
       int doc_steps = doc["steps"].as<int>();
-      if (doc_steps > 0) {
+      if (doc_steps != 0) {
         target += doc_steps;
         int doc_velocity = doc["velocity"].as<int>();
         if (doc_velocity >= 1000 and doc_velocity <= 10000) {
