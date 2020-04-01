@@ -1,7 +1,7 @@
 #include <ArduinoJson.h>
 
-#define stp 10
-#define dir 16
+#define stp 23
+#define dir 22
 
 long pos = 0;
 long target = 0;
